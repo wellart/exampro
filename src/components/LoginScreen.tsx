@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BookOpen, Lock, User, Mail, ShieldCheck, UserCheck, Sparkles, UserPlus } from "lucide-react";
+import { BookOpen, Lock, User, Mail, Sparkles, UserPlus } from "lucide-react";
 
 interface LoginScreenProps {
   onLoginSuccess: (user: any) => void;
@@ -46,6 +46,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
       }
 
       onLoginSuccess(data.user);
+      localStorage.setItem("exampro_token", data.token || "");
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
     } finally {

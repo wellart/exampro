@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Play, Clipboard, BookOpen, AlertCircle, Sparkles, ChevronLeft, ChevronRight, CheckCircle2, Clock, Check, Lock } from "lucide-react";
+import { Play, Clipboard, BookOpen, Sparkles, ChevronLeft, ChevronRight, Clock, Check, Lock } from "lucide-react";
 import { decryptText } from "../utils";
 
 interface StudentPortalProps {
@@ -9,10 +9,10 @@ interface StudentPortalProps {
   user?: any;
 }
 
-export default function StudentPortal({ onExamCompleted, syncTrigger, setSyncTrigger, user }: StudentPortalProps) {
+export default function StudentPortal({ onExamCompleted, syncTrigger: _syncTrigger, setSyncTrigger, user }: StudentPortalProps) {
   const [exams, setExams] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
 
   // Form states
   const [studentName, setStudentName] = useState(user?.fullName || "");

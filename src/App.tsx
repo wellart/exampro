@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { BookOpen, UserCheck, ShieldCheck, HelpCircle, LogOut } from "lucide-react";
+import { useState } from "react";
+import { BookOpen, UserCheck, LogOut } from "lucide-react";
 import StudentPortal from "./components/StudentPortal";
 import TeacherDashboard from "./components/TeacherDashboard";
 import StudentResultPage from "./components/StudentResultPage";
@@ -32,6 +32,7 @@ export default function App() {
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("exampro_session_user");
+    localStorage.removeItem("exampro_token");
     setActiveSubmissionId(null);
     setStudentSubTab("soal");
   };

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Award, BookOpen, Clock, Calendar, CheckCircle, XCircle, RefreshCw, Eye, Printer } from "lucide-react";
-import { formatDate } from "../utils";
+import { useState, useEffect } from "react";
+import { Award, BookOpen, CheckCircle, XCircle, RefreshCw, Eye } from "lucide-react";
+import { formatDate, getAuthHeaders } from "../utils";
 import StudentResultPage from "./StudentResultPage";
 
 interface StudentScoresListProps {
@@ -17,7 +17,7 @@ export default function StudentScoresList({ user }: StudentScoresListProps) {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("/api/submissions");
+      const res = await fetch("/api/submissions", { headers: getAuthHeaders() });
       if (!res.ok) throw new Error("Gagal mengambil data riwayat nilai.");
       
       const allSubmissions = await res.json();

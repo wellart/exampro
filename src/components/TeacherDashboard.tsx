@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getAuthHeaders } from "../utils";
 import {
   Users,
   BookOpen,
@@ -9,9 +10,7 @@ import {
   RefreshCw,
   PlusCircle,
   CheckCircle2,
-  XCircle,
   FileSpreadsheet,
-  FileText,
   Trash2,
   Lock,
   Search,
@@ -78,7 +77,7 @@ export default function TeacherDashboard() {
     }
     setManageQuestionsLoading(true);
     try {
-      const res = await fetch(`/api/exams/${examId}/questions`);
+      const res = await fetch(`/api/exams/${examId}/questions`, { headers: getAuthHeaders() });
       if (res.ok) {
         const data = await res.json();
         setManageQuestions(data.questions || []);
@@ -99,7 +98,7 @@ export default function TeacherDashboard() {
   const handleDeleteQuestion = async (qId: number) => {
     if (!confirm("Apakah Anda yakin ingin menghapus soal ini? Data nilai KKM akan disesuaikan otomatis di database SQLite.")) return;
     try {
-      const res = await fetch(`/api/questions/${qId}`, { method: "DELETE" });
+      const res = await fetch(`/api/questions/${qId}`, { method: "DELETE", headers: getAuthHeaders() });
       if (res.ok) {
         fetchManageQuestions(manageExamId);
         setRefreshTrigger((prev) => !prev);
@@ -117,7 +116,7 @@ export default function TeacherDashboard() {
     try {
       const res = await fetch(`/api/questions/${editingQuestion.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           category: editingQuestion.category || "Umum",
           questionText: editingQuestion.questionText,
@@ -151,7 +150,7 @@ export default function TeacherDashboard() {
     try {
       const res = await fetch("/api/questions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           examId: Number(manageExamId),
           category: newQCategory,
@@ -329,10 +328,10 @@ export default function TeacherDashboard() {
       setLoading(true);
       
       const [examsRes, subsRes, mailRes, statsRes] = await Promise.all([
-        fetch("/api/exams"),
-        fetch("/api/submissions"),
-        fetch("/api/mail-logs"),
-        fetch("/api/dashboard/stats"),
+        fetch("/api/exams", { headers: getAuthHeaders() }),
+        fetch("/api/submissions", { headers: getAuthHeaders() }),
+        fetch("/api/mail-logs", { headers: getAuthHeaders() }),
+        fetch("/api/dashboard/stats", { headers: getAuthHeaders() }),
       ]);
 
       if (examsRes.ok) setExams(await examsRes.json());
@@ -359,7 +358,7 @@ export default function TeacherDashboard() {
   const handleDeleteExam = async (id: number) => {
     if (!confirm("Apakah Anda yakin ingin menghapus ujian ini beserta seluruh soal dan nilai siswa di dalamnya?")) return;
     try {
-      const res = await fetch(`/api/exams/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/exams/${id}`, { method: "DELETE", headers: getAuthHeaders() });
       if (res.ok) {
         setRefreshTrigger((prev) => !prev);
       }
@@ -384,7 +383,7 @@ export default function TeacherDashboard() {
     try {
       const res = await fetch("/api/exams/import", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           title: newExamTitle,
           description: newExamDesc || "Ujian khusus buatan pengajar.",
@@ -409,6 +408,7 @@ export default function TeacherDashboard() {
     try {
       const res = await fetch(`/api/submissions/${submissionId}/send-report`, {
         method: "POST",
+        headers: getAuthHeaders(),
       });
       if (res.ok) {
         alert("Rapor berhasil dikirim ulang ke alamat email wali murid secara instan.");
@@ -443,7 +443,7 @@ export default function TeacherDashboard() {
 
       const res = await fetch("/api/exams/import", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           title: importTitle,
           description: `Impor massal manual pada ${new Date().toLocaleDateString("id-ID")}`,
@@ -487,7 +487,7 @@ export default function TeacherDashboard() {
       }
       const res = await fetch("/api/users/bulk", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ users: parsedUsers }),
       });
       const data = await res.json();

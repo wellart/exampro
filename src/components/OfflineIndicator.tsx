@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Wifi, WifiOff, RefreshCw } from "lucide-react";
 
 interface OfflineIndicatorProps {

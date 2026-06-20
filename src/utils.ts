@@ -3,6 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Get Authorization header for protected API calls
+export function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem("exampro_token");
+  if (!token) return { "Content-Type": "application/json" };
+  return {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + token,
+  };
+}
+
 // Decrypt questions on the fly from reversed Base64
 export function decryptText(text: string): string {
   if (!text) return "";

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle, XCircle, Award, Mail, Printer, BookOpen, AlertCircle, RefreshCw } from "lucide-react";
-import { formatDate } from "../utils";
+import { formatDate, getAuthHeaders } from "../utils";
 
 interface StudentResultPageProps {
   submissionId: number;
@@ -20,7 +20,7 @@ export default function StudentResultPage({ submissionId, onRestart }: StudentRe
   const fetchResults = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/submissions/${submissionId}`);
+      const res = await fetch(`/api/submissions/${submissionId}`, { headers: getAuthHeaders() });
       if (!res.ok) {
         throw new Error("Gagal mengambil data hasil ujian.");
       }
@@ -42,6 +42,7 @@ export default function StudentResultPage({ submissionId, onRestart }: StudentRe
       setMailStatus({ loading: true, success: false, message: "" });
       const res = await fetch(`/api/submissions/${submissionId}/send-report`, {
         method: "POST",
+        headers: getAuthHeaders(),
       });
       if (!res.ok) {
         throw new Error("Gagal mengirim rapor digital.");

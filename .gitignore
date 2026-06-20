@@ -1,8 +1,10 @@
 node_modules/
-build/
 dist/
-coverage/
+.env
+ujian.db
+server.js
+*.tsbuildinfo
 .DS_Store
-*.log
-.env*
-!.env.example
+Thumbs.db
+
+.vercel
