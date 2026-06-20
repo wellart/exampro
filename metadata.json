@@ -1,0 +1,6 @@
+{
+  "name": "Aplikasi Ujian Online",
+  "description": "Aplikasi Ujian Online interaktif untuk guru dan siswa, dilengkapi pengerjaan multi-page, analisis nilai, sinkronisasi offline, monitoring waktu nyata, dan pengiriman rapor digital ke wali murid.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
