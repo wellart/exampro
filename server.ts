@@ -7,7 +7,11 @@ const app = express();
 const PORT = 3000;
 
 // Initialize SQLite database
-const db = new Database("ujian.db");
+let dbPath = "ujian.db";
+if (process.env.VERCEL) {
+  dbPath = "/tmp/ujian.db";
+}
+const db = new Database(dbPath);
 
 // Enable foreign keys
 db.pragma("foreign_keys = ON");
@@ -30,6 +34,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS questions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     examId INTEGER NOT NULL,
+    category TEXT, -- e.g. Matematika, IPA
     questionText TEXT NOT NULL,
     optionA TEXT NOT NULL,
     optionB TEXT NOT NULL,
@@ -82,7 +87,7 @@ db.exec(`
   );
 `);
 
-// Schema Migration for startDate and endDate
+// Schema Migration
 try {
   db.prepare("ALTER TABLE exams ADD COLUMN startDate TEXT").run();
 } catch (e) {
@@ -90,6 +95,11 @@ try {
 }
 try {
   db.prepare("ALTER TABLE exams ADD COLUMN endDate TEXT").run();
+} catch (e) {
+  // Column might already exist
+}
+try {
+  db.prepare("ALTER TABLE questions ADD COLUMN category TEXT").run();
 } catch (e) {
   // Column might already exist
 }
@@ -169,13 +179,14 @@ if (checkExams.count === 0) {
   ];
 
   const stmtQ1 = db.prepare(`
-    INSERT INTO questions (examId, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints, orderNo)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO questions (examId, category, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints, orderNo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   questions1.forEach((q, idx) => {
     stmtQ1.run(
       1,
+      "Pengetahuan Umum",
       q.text,
       q.options[0],
       q.options[1],
@@ -206,8 +217,8 @@ if (checkExams.count === 0) {
   );
 
   const stmtQ2 = db.prepare(`
-    INSERT INTO questions (examId, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints, orderNo)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO questions (examId, category, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints, orderNo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   // Programmatically generate 60 elegant logical math questions
@@ -224,6 +235,7 @@ if (checkExams.count === 0) {
 
     stmtQ2.run(
       2,
+      "Matematika",
       `Berapakah hasil dari operasi perhitungan matematika sederhana berikut: ${term1} + ${term2}? (Soal ke-${i})`,
       opA,
       opB,
@@ -671,13 +683,14 @@ app.post("/api/exams/import", (req, res) => {
 
     // Insert questions
     const stmtQ = db.prepare(`
-      INSERT INTO questions (examId, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints, orderNo)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO questions (examId, category, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints, orderNo)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     questions.forEach((q: any, idx) => {
       stmtQ.run(
         newExamId,
+        q.category || "Umum",
         q.questionText || `Contoh Soal Pilihan Ganda ke-${idx + 1}`,
         q.optionA || "Pilihan A",
         q.optionB || "Pilihan B",
@@ -1033,7 +1046,7 @@ app.post("/api/auth/register", (req, res) => {
 app.put("/api/questions/:id", (req, res) => {
   try {
     const { id } = req.params;
-    const { questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints } = req.body;
+    const { category, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints } = req.body;
 
     const q = db.prepare("SELECT examId FROM questions WHERE id = ?").get(id) as { examId: number } | undefined;
     if (!q) {
@@ -1042,9 +1055,10 @@ app.put("/api/questions/:id", (req, res) => {
 
     db.prepare(`
       UPDATE questions 
-      SET questionText = ?, optionA = ?, optionB = ?, optionC = ?, optionD = ?, optionE = ?, correctOption = ?, scorePoints = ?
+      SET category = ?, questionText = ?, optionA = ?, optionB = ?, optionC = ?, optionD = ?, optionE = ?, correctOption = ?, scorePoints = ?
       WHERE id = ?
     `).run(
+      category || "Umum",
       questionText,
       optionA,
       optionB,
@@ -1083,7 +1097,7 @@ app.delete("/api/questions/:id", (req, res) => {
 // 17. POST /api/questions (Create a new single question)
 app.post("/api/questions", (req, res) => {
   try {
-    const { examId, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints } = req.body;
+    const { examId, category, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints } = req.body;
     if (!examId || !questionText) {
       return res.status(400).json({ error: "examId dan teks pertanyaan wajib diisi." });
     }
@@ -1092,10 +1106,11 @@ app.post("/api/questions", (req, res) => {
     const nextOrder = (maxOrder.maxO || 0) + 1;
 
     db.prepare(`
-      INSERT INTO questions (examId, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints, orderNo)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO questions (examId, category, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints, orderNo)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       examId,
+      category || "Umum",
       questionText,
       optionA || "Pilihan A",
       optionB || "Pilihan B",
@@ -1133,14 +1148,15 @@ app.post("/api/exams/:id/questions/bulk", (req, res) => {
     let startOrder = (maxOrder.maxO || 0) + 1;
 
     const stmtQ = db.prepare(`
-      INSERT INTO questions (examId, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints, orderNo)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO questions (examId, category, questionText, optionA, optionB, optionC, optionD, optionE, correctOption, scorePoints, orderNo)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const transaction = db.transaction((qs) => {
       qs.forEach((q: any) => {
         stmtQ.run(
           id,
+          q.category || "Umum",
           q.questionText || "Pertanyaan Baru",
           q.optionA || "Pilihan A",
           q.optionB || "Pilihan B",
@@ -1164,24 +1180,28 @@ app.post("/api/exams/:id/questions/bulk", (req, res) => {
 });
 
 // VITE APP DEVELOPMENT AND PRODUCTION RUNNERS
-async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+if (!process.env.VERCEL) {
+  async function startServer() {
+    if (process.env.NODE_ENV !== "production") {
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: "spa",
+      });
+      app.use(vite.middlewares);
+    } else {
+      const distPath = path.join(process.cwd(), "dist");
+      app.use(express.static(distPath));
+      app.get("*", (req, res) => {
+        res.sendFile(path.join(distPath, "index.html"));
+      });
+    }
+
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://0.0.0.0:${PORT}`);
     });
   }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
-  });
+  startServer();
 }
 
-startServer();
+// Export for Vercel Serverless Function
+export default app;

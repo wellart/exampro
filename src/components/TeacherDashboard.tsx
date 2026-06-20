@@ -61,6 +61,7 @@ export default function TeacherDashboard() {
   const [showAddQuestionForm, setShowAddQuestionForm] = useState<boolean>(false);
   
   // Single question form states
+  const [newQCategory, setNewQCategory] = useState("Umum");
   const [newQText, setNewQText] = useState("");
   const [newQOptA, setNewQOptA] = useState("");
   const [newQOptB, setNewQOptB] = useState("");
@@ -118,6 +119,7 @@ export default function TeacherDashboard() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          category: editingQuestion.category || "Umum",
           questionText: editingQuestion.questionText,
           optionA: editingQuestion.optionA,
           optionB: editingQuestion.optionB,
@@ -152,6 +154,7 @@ export default function TeacherDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           examId: Number(manageExamId),
+          category: newQCategory,
           questionText: newQText,
           optionA: newQOptA,
           optionB: newQOptB,
@@ -165,6 +168,7 @@ export default function TeacherDashboard() {
 
       if (res.ok) {
         setShowAddQuestionForm(false);
+        setNewQCategory("Umum");
         setNewQText("");
         setNewQOptA("");
         setNewQOptB("");
@@ -828,104 +832,104 @@ export default function TeacherDashboard() {
         </div>
       </div>
 
-      {/* 3. Segmented Navigation Tabs */}
-      <div className="border-b border-slate-200">
-        <nav className="flex gap-6 -mb-px">
-          <button
-            onClick={() => setActiveTab("stats")}
-            className={`pb-3 text-xs md:text-sm font-bold border-b-2 cursor-pointer ${
-              activeTab === "stats"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5" />
-            Analisis Kompetensi Otomatis
-          </button>
-          
-          <button
-            onClick={() => setActiveTab("submissions")}
-            className={`pb-3 text-xs md:text-sm font-bold border-b-2 cursor-pointer ${
-              activeTab === "submissions"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            <Users className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5" />
-            Pemantauan Waktu Nyata
-          </button>
+      {/* Main Layout: Sidebar & Content */}
+      <div className="flex flex-col md:flex-row gap-6 mt-6 items-start">
+        
+        {/* 3. Sidebar Navigation Tabs */}
+        <div className="w-full md:w-64 shrink-0 bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col shadow-sm">
+          <div className="bg-slate-50 border-b border-slate-200 p-4">
+            <h3 className="font-black text-slate-800 text-sm">Navigasi Utama</h3>
+          </div>
+          <nav className="flex flex-col p-2 space-y-1">
+            <button
+              onClick={() => setActiveTab("stats")}
+              className={`w-full flex items-center px-4 py-3 text-xs md:text-sm font-bold rounded-lg transition ${
+                activeTab === "stats"
+                  ? "bg-blue-50 text-blue-700 relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-blue-600 before:rounded-r-md"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+              }`}
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analisis Kompetensi
+            </button>
+            <button
+              onClick={() => setActiveTab("submissions")}
+              className={`w-full flex items-center px-4 py-3 text-xs md:text-sm font-bold rounded-lg transition ${
+                activeTab === "submissions"
+                  ? "bg-blue-50 text-blue-700 relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-blue-600 before:rounded-r-md"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+              }`}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Pemantauan Waktu Nyata
+            </button>
+            <button
+              onClick={() => setActiveTab("import")}
+              className={`w-full flex items-center px-4 py-3 text-xs md:text-sm font-bold rounded-lg transition ${
+                activeTab === "import"
+                  ? "bg-blue-50 text-blue-700 relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-blue-600 before:rounded-r-md"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+              }`}
+            >
+              <UploadCloud className="w-4 h-4 mr-2" />
+              Impor Soal Baru
+            </button>
+            <button
+              onClick={() => setActiveTab("emails")}
+              className={`w-full flex items-center px-4 py-3 text-xs md:text-sm font-bold rounded-lg transition ${
+                activeTab === "emails"
+                  ? "bg-blue-50 text-blue-700 relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-blue-600 before:rounded-r-md"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+              }`}
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              Outbox Rapor ({mailLogs.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("exams")}
+              className={`w-full flex items-center px-4 py-3 text-xs md:text-sm font-bold rounded-lg transition ${
+                activeTab === "exams"
+                  ? "bg-blue-50 text-blue-700 relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-blue-600 before:rounded-r-md"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+              }`}
+            >
+              <Lock className="w-4 h-4 mr-2" />
+              Katalog Ujian
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab("questions");
+                if (!manageExamId && exams.length > 0) {
+                  setManageExamId(exams[0].id.toString());
+                }
+              }}
+              className={`w-full flex items-center px-4 py-3 text-xs md:text-sm font-bold rounded-lg transition ${
+                activeTab === "questions"
+                  ? "bg-blue-50 text-blue-700 relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-blue-600 before:rounded-r-md"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+              }`}
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Kelola Bank Soal
+            </button>
+            <button
+              onClick={() => setActiveTab("users")}
+              className={`w-full flex items-center px-4 py-3 text-xs md:text-sm font-bold rounded-lg transition ${
+                activeTab === "users"
+                  ? "bg-blue-50 text-blue-700 relative before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:bg-blue-600 before:rounded-r-md"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+              }`}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Kelola Pengguna Baru
+            </button>
+          </nav>
+        </div>
 
-          <button
-            onClick={() => setActiveTab("import")}
-            className={`pb-3 text-xs md:text-sm font-bold border-b-2 cursor-pointer ${
-              activeTab === "import"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            <UploadCloud className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5" />
-            Impor Soal Massal (Excel/JSON)
-          </button>
-
-          <button
-            onClick={() => setActiveTab("emails")}
-            className={`pb-3 text-xs md:text-sm font-bold border-b-2 cursor-pointer ${
-              activeTab === "emails"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            <Mail className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5" />
-            Outbox Rapor Digital ({mailLogs.length})
-          </button>
-
-          <button
-            onClick={() => setActiveTab("exams")}
-            className={`pb-3 text-xs md:text-sm font-bold border-b-2 cursor-pointer ${
-              activeTab === "exams"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            <Lock className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5" />
-            Katalog Enkripsi Ujian
-          </button>
-
-          <button
-            onClick={() => {
-              setActiveTab("questions");
-              if (!manageExamId && exams.length > 0) {
-                setManageExamId(exams[0].id.toString());
-              }
-            }}
-            className={`pb-3 text-xs md:text-sm font-bold border-b-2 cursor-pointer ${
-              activeTab === "questions"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5" />
-            Kelola Bank Soal
-          </button>
-
-          <button
-            onClick={() => setActiveTab("users")}
-            className={`pb-3 text-xs md:text-sm font-bold border-b-2 cursor-pointer ${
-              activeTab === "users"
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            <Users className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5" />
-            Kelola Pengguna Baru
-          </button>
-        </nav>
-      </div>
-
-      {/* 4. Tab Contents */}
-
-      {/* TAB 1: ANALISIS NILAI OTOMATIS */}
-      {activeTab === "stats" && (
+        {/* 4. Tab Contents */}
+        <div className="flex-1 min-w-0">
+          {/* TAB 1: ANALISIS NILAI OTOMATIS */}
+          {activeTab === "stats" && (
         <div className="space-y-6">
           {stats.length === 0 ? (
             <div className="text-center p-12 bg-white rounded-xl border text-slate-400">
@@ -1571,16 +1575,29 @@ export default function TeacherDashboard() {
                 </div>
 
                 <div className="space-y-3">
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Teks Pertanyaan *</label>
-                    <textarea
-                      required
-                      placeholder="Masukkan pertanyaan baru di sini..."
-                      value={newQText}
-                      onChange={(e) => setNewQText(e.target.value)}
-                      className="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white"
-                      rows={3}
-                    />
+                  <div className="grid grid-cols-[1fr_2fr] gap-3">
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Kategori *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Matematika, IPA"
+                        value={newQCategory}
+                        onChange={(e) => setNewQCategory(e.target.value)}
+                        className="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Teks Pertanyaan *</label>
+                      <textarea
+                        required
+                        placeholder="Masukkan pertanyaan baru di sini..."
+                        value={newQText}
+                        onChange={(e) => setNewQText(e.target.value)}
+                        className="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white"
+                        rows={3}
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -1701,15 +1718,27 @@ export default function TeacherDashboard() {
                 </div>
 
                 <div className="space-y-3">
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Teks Pertanyaan *</label>
-                    <textarea
-                      required
-                      value={editingQuestion.questionText}
-                      onChange={(e) => setEditingQuestion({ ...editingQuestion, questionText: e.target.value })}
-                      className="w-full text-xs p-2.5 border border-slate-350 rounded-lg bg-white"
-                      rows={3}
-                    />
+                  <div className="grid grid-cols-[1fr_2fr] gap-3">
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Kategori *</label>
+                      <input
+                        type="text"
+                        required
+                        value={editingQuestion.category || "Umum"}
+                        onChange={(e) => setEditingQuestion({ ...editingQuestion, category: e.target.value })}
+                        className="w-full text-xs p-2.5 border border-slate-350 rounded-lg bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Teks Pertanyaan *</label>
+                      <textarea
+                        required
+                        value={editingQuestion.questionText}
+                        onChange={(e) => setEditingQuestion({ ...editingQuestion, questionText: e.target.value })}
+                        className="w-full text-xs p-2.5 border border-slate-350 rounded-lg bg-white"
+                        rows={3}
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -1842,6 +1871,11 @@ export default function TeacherDashboard() {
                       <tr key={q.id} className="hover:bg-slate-50">
                         <td className="p-4 text-center font-bold text-slate-500">{idx + 1}</td>
                         <td className="p-4 space-y-1.5 leading-relaxed">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded text-[9px] uppercase tracking-wider border border-slate-200">
+                              {q.category || "Umum"}
+                            </span>
+                          </div>
                           <p className="font-extrabold text-slate-800 text-xs">{q.questionText}</p>
                           <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-[11px] text-slate-500 font-medium">
                             <span>A. {q.optionA}</span>
@@ -1972,6 +2006,8 @@ export default function TeacherDashboard() {
         </div>
       )}
 
+        </div>
+      </div>
     </div>
   );
 }

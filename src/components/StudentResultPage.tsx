@@ -144,6 +144,22 @@ export default function StudentResultPage({ submissionId, onRestart }: StudentRe
 
             {/* Actions Panel */}
             <div className="flex flex-wrap gap-2 pt-3.5 border-t border-slate-100">
+              {submission.isPassed && (
+                <button
+                  onClick={() => {
+                    const style = document.createElement('style');
+                    style.innerHTML = `@media print { body * { visibility: hidden; } #certificate-view, #certificate-view * { visibility: visible; } #certificate-view { position: fixed; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; box-shadow: none; border: none; } }`;
+                    document.head.appendChild(style);
+                    window.print();
+                    setTimeout(() => { document.head.removeChild(style); }, 500);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold rounded transition cursor-pointer"
+                >
+                  <Award className="w-3.5 h-3.5" />
+                  Sertifikat Kelulusan PDF
+                </button>
+              )}
+
               <button
                 onClick={() => window.print()}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-bold rounded transition cursor-pointer"
@@ -219,7 +235,7 @@ export default function StudentResultPage({ submissionId, onRestart }: StudentRe
 
       {/* 2. Certificate of Achievement for Passed Students (Visual feedback) */}
       {submission.isPassed && (
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200/70 rounded p-5 space-y-3 shadow-sm text-center relative overflow-hidden print-page-break">
+        <div id="certificate-view" className="bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200/70 rounded p-5 space-y-3 shadow-sm text-center relative overflow-hidden print-page-break">
           <Award className="w-10 h-10 text-amber-500 mx-auto transform hover:scale-105 transition duration-300" />
           
           <div className="space-y-0.5">

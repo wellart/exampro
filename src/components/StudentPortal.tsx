@@ -458,23 +458,50 @@ export default function StudentPortal({ onExamCompleted, syncTrigger, setSyncTri
             )}
 
             <div className="border-t border-slate-100 pt-3">
-              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Mata Ujian Tersedia (SQLITE_LIST)</label>
+              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-2">Mata Ujian Tersedia</label>
               {exams.length === 0 ? (
                 <div className="p-3 text-xs bg-amber-50 rounded text-amber-700 font-semibold border border-amber-100">
                   Belum ada ujian yang ditambahkan oleh Guru. Silakan masuk ke panel guru untuk mengimpor atau membuat ujian baru.
                 </div>
               ) : (
-                <select
-                  value={selectedExamId}
-                  onChange={(e) => setSelectedExamId(e.target.value)}
-                  className="w-full text-xs p-2.5 border border-slate-200 bg-white rounded focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                >
-                  {exams.map((ex) => (
-                    <option key={ex.id} value={ex.id}>
-                      {ex.title} (Durasi: {ex.duration} menit, {ex.questionsCount} Soal)
-                    </option>
-                  ))}
-                </select>
+                <div className="grid sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto pr-1 select-none">
+                  {exams.map((ex) => {
+                    const isLocked = checkIsExamLocked(ex);
+                    return (
+                      <div
+                        key={ex.id}
+                        onClick={() => {
+                          if (!isLocked) setSelectedExamId(ex.id.toString());
+                        }}
+                        className={`relative p-3 rounded-lg border-2 transition-all cursor-pointer ${
+                          isLocked
+                            ? "border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed"
+                            : selectedExamId === ex.id.toString()
+                            ? "border-blue-600 bg-blue-50/50 shadow-sm"
+                            : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs"
+                        }`}
+                      >
+                        {selectedExamId === ex.id.toString() && !isLocked && (
+                          <div className="absolute top-2 right-2 flex items-center justify-center w-4 h-4 bg-blue-600 rounded-full text-white">
+                            <Check className="w-3 h-3" />
+                          </div>
+                        )}
+                        <h3 className={`font-bold text-xs mb-1 pr-6 ${isLocked ? 'text-slate-500' : 'text-slate-800'}`}>
+                          {ex.title}
+                        </h3>
+                        <div className="flex items-center gap-3 text-[10px] text-slate-500 font-mono">
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {ex.duration} mnt</span>
+                          <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" /> {ex.questionsCount} soal</span>
+                        </div>
+                        {isLocked && (
+                          <div className="mt-2 text-[9px] font-bold text-rose-500 flex items-center gap-1 uppercase">
+                            <Lock className="w-3 h-3" /> Di luar Jadwal
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
